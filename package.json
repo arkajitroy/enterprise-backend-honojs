@@ -5,11 +5,13 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
+    "colors": "^1.4.0",
     "hono": "^4.7.7",
     "http-status-codes": "^2.3.0",
     "mongoose": "^8.14.0",
     "rate-limiter-flexible": "^7.0.0",
     "uuid": "^11.1.0",
+    "winston": "^3.17.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
