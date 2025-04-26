@@ -11,7 +11,7 @@ class Middleware {
     console.log("Middleware initialized!");
   }
 
-  private static rateLimiter = new RateLimiterMemory({
+  static rateLimiter = new RateLimiterMemory({
     points: 10,
     duration: 60,
     blockDuration: 60,
@@ -50,8 +50,10 @@ class Middleware {
   }
 
   static async rateLimit(c: any, next: () => Promise<void>) {
+    const ip = c.req.header("x-forwarded-for") || c.req.header("cf-connecting-ip") || c.req.ip || "unknown";
+
     try {
-      await this.rateLimiter.consume(c.req.ip);
+      await Middleware.rateLimiter.consume(ip);
       await next();
     } catch (err: any) {
       if (err?.msBeforeNext) {
