@@ -1,3 +1,0 @@
-{"level":"info","message":"{\"level\":\"info\",\"requestId\":\"c62c8226-4efb-42a2-a29e-09ba7cb95143\",\"method\":\"GET\",\"url\":\"http://localhost:8000/\",\"ip\":\"unknown\",\"timestamp\":\"2025-04-26T06:06:07.138Z\"}","timestamp":"2025-04-26T06:06:07.139Z"}
-{"level":"info","message":"🟢 {\"level\":\"info\",\"requestId\":\"17c36376-09e9-4720-a538-71ac943f5607\",\"method\":\"GET\",\"url\":\"http://localhost:8000/\",\"ip\":\"unknown\",\"timestamp\":\"2025-04-26T06:07:47.786Z\"}","timestamp":"2025-04-26T06:07:47.787Z"}
-{"ip":"unknown","level":"info","method":"GET","requestId":"a571ed5d-22c8-44d4-96d7-296143c473c5","timestamp":"2025-04-26T06:14:37.099Z","url":"http://localhost:8000/"}

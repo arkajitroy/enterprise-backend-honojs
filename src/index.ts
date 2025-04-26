@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { logger as appLogger } from "hono/logger";
 import { PORT } from "@/constants/env";
 import Middleware from "./config/middleware";
+import { routes } from "./app/routes";
 
 const app = new Hono();
 
@@ -9,10 +10,11 @@ const app = new Hono();
 app.use("*", appLogger());
 app.use("*", Middleware.requestLogger);
 app.use("*", Middleware.corsConfig());
+app.use("*", Middleware.rateLimit);
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
+// ROUTING CONFIGURATION
+app.get("/", (c) => c.text("Welcome to the API!"));
+app.route("api/auth", routes.authRoutes);
 
 export default {
   fetch: app.fetch,
