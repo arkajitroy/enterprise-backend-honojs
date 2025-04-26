@@ -11,3 +11,6 @@ const authRoutes = new Hono();
 // authRoutes.post("/logout", Middleware.authenticate, authController.logout.bind(authController));
 
 export default authRoutes;
+
+// TODO: Implement the whole thing in a classbased approach
+// TODO: use the module based pattern for the keeping all the controller and the services
