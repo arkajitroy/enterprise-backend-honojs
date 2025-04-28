@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
+    "@hono/zod-validator": "^0.5.0",
     "colors": "^1.4.0",
     "hono": "^4.7.7",
     "http-status-codes": "^2.3.0",

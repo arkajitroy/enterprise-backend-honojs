@@ -1,15 +1,13 @@
 import { ApiError } from "@/libs/utils";
 import { StatusCodes } from "http-status-codes";
-import { z } from "zod";
+import { ZodSchema } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { logger } from "@/libs/logger";
 import { cors } from "hono/cors";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
 class Middleware {
-  constructor() {
-    console.log("Middleware initialized!");
-  }
+  constructor() {}
 
   static rateLimiter = new RateLimiterMemory({
     points: 10,
@@ -17,7 +15,7 @@ class Middleware {
     blockDuration: 60,
   });
 
-  static async validateRequest(schema: z.ZodSchema) {
+  static validateRequest(schema: ZodSchema) {
     return async (c: any, next: () => Promise<void>) => {
       const body = await c.req.json();
       const validation = schema.safeParse(body);
