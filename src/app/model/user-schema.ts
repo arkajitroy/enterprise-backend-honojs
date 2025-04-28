@@ -8,7 +8,7 @@ const userSchema = new Schema({
   created_at: { type: Date, default: Date.now },
 });
 
-const userModel = mongoose.model("User", userSchema);
+const userModel = mongoose.model("users", userSchema);
 
 export type TUserSchema = InferSchemaType<typeof userSchema>;
 
