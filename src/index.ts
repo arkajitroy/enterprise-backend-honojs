@@ -3,6 +3,7 @@ import { logger as appLogger } from "hono/logger";
 import { PORT } from "@/constants/env";
 import Middleware from "./config/middleware";
 import AppRouter from "./app/routes/index.routes";
+import { MiddlewareError } from "./libs/utils";
 
 const app = new Hono();
 
@@ -11,6 +12,7 @@ app.use("*", appLogger());
 app.use("*", Middleware.requestLogger);
 app.use("*", Middleware.corsConfig());
 app.use("*", Middleware.rateLimit);
+app.use("*", MiddlewareError);
 
 // ROUTING CONFIGURATION
 app.get("/", (c) => c.text("Welcome to the API!"));

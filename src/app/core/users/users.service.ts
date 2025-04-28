@@ -12,7 +12,8 @@ abstract class AuthServiceAbstaction {
   abstract register(data: RegisterDto): Promise<AuthResponse>;
   abstract login(data: LoginDto): Promise<AuthResponse>;
   abstract logout(data: LogoutDto): Promise<void>;
-  protected abstract generateToken(user: Pick<TUserSchema, "id" | "email">): Promise<string>;
+  protected abstract generateRefreshToken(user: Pick<TUserSchema, "id" | "email">): Promise<string>;
+  protected abstract generateAccessToken(user: Pick<TUserSchema, "id" | "email">): Promise<string>;
 }
 
 // ==================================== AUTH SERVICE ========================================
@@ -26,25 +27,14 @@ class AuthService extends AuthServiceAbstaction {
     return uuidv4();
   }
 
-  protected async generateToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
-    return await sign(
-      {
-        sub: user.id,
-        email: user.email,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60,
-      },
-      JWT_SECRET
-    );
-  }
-
-  private async generateRefreshToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
+  protected async generateRefreshToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
     return sign(
       { sub: user.id, email: user.email, exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 },
       REFRESH_TOKEN_SECRET
     );
   }
 
-  private async generateAccessToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
+  protected async generateAccessToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
     return sign({ sub: user.id, email: user.email, exp: Math.floor(Date.now() / 1000) + 15 * 60 }, JWT_SECRET);
   }
 
@@ -85,6 +75,12 @@ class AuthService extends AuthServiceAbstaction {
 
   async logout(userId: string) {
     await userModel.updateOne({ id: userId }, { $unset: { refreshToken: "" } });
+  }
+
+  async refresh(c: { get: (arg0: string) => any }) {
+    const user = c.get("user");
+    const accessToken = await this.generateAccessToken({ id: user.sub, email: user.email });
+    return { accessToken, user: { id: user.sub, email: user.email } };
   }
 }
 
