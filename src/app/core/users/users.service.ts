@@ -5,6 +5,7 @@ import { JWT_SECRET, REFRESH_TOKEN_SECRET } from "@/constants/env";
 import { sign } from "hono/jwt";
 import { ApiError } from "@/libs/utils";
 import { StatusCodes } from "http-status-codes";
+import { hash, compare } from "bcryptjs";
 
 // ==================================== AUTH SERVICE ========================================
 
@@ -19,12 +20,17 @@ abstract class AuthServiceAbstaction {
 // ==================================== AUTH SERVICE ========================================
 
 class AuthService extends AuthServiceAbstaction {
-  private async hashPassword(password: string): Promise<string> {
-    return password; // Replace with real hashing in production
-  }
-
   private generateUserId(): string {
     return uuidv4();
+  }
+
+  private async encryptPassword(password: string): Promise<string> {
+    const hashedPassword = await hash(password, 10);
+    return hashedPassword;
+  }
+
+  private async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+    return compare(password, hashedPassword);
   }
 
   protected async generateRefreshToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
@@ -42,7 +48,7 @@ class AuthService extends AuthServiceAbstaction {
     const existingUser = await userModel.findOne({ email: data.email });
     if (existingUser) throw new ApiError("User already exists", StatusCodes.CONFLICT);
 
-    const hashedPassword = await this.hashPassword(data.password);
+    const hashedPassword = await this.encryptPassword(data.password);
     const user: TUserPayload = {
       id: this.generateUserId(),
       email: data.email,
@@ -63,8 +69,9 @@ class AuthService extends AuthServiceAbstaction {
     const user = await userModel.findOne({ email: data.email });
     if (!user) throw new ApiError("Invalid credentials", 401);
 
-    const hashedPassword = await this.hashPassword(data.password);
-    if (user.password !== hashedPassword) throw new ApiError("Invalid credentials", 401);
+    if (!this.comparePassword(data.password, user.password)) {
+      throw new ApiError("Invalid credentials", 401);
+    }
 
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
