@@ -2,18 +2,31 @@ import mongoose from "mongoose";
 import { DB_NAME, MONGODB_LOCAL_URL } from "@/constants/env";
 import { logger } from "@/libs/logger";
 
-const dbConnect = async (): Promise<typeof mongoose> => {
-  const db_uri = `${MONGODB_LOCAL_URL}/${DB_NAME}`;
+class Database {
+  private db: mongoose.Connection | null = null;
 
-  mongoose.set("strictQuery", true);
+  constructor() {
+    this.db = null;
+  }
 
-  const connection = await mongoose.connect(db_uri);
-  logger.info({
-    message: "MongoDB connected successfully",
-    db_uri,
-  });
+  private initialize(): void {
+    this.db = mongoose.connection;
+    this.db.on("error", (error) => logger.error({ message: "MongoDB connection error", error }));
+    this.db.once("open", () => logger.info({ message: "MongoDB connected successfully", ip: MONGODB_LOCAL_URL }));
+  }
 
-  return connection;
-};
+  public async connect(): Promise<void> {
+    if (this.db) return;
+    this.initialize();
+    try {
+      await mongoose.connect(MONGODB_LOCAL_URL, {
+        dbName: DB_NAME,
+      });
+    } catch (error) {
+      logger.error({ message: "MongoDB connection failed", error });
+      throw new Error("Failed to connect to MongoDB");
+    }
+  }
+}
 
-export default dbConnect;
+export default Database;
