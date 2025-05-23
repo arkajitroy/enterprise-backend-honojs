@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import AuthService from "./users.service";
-import AuthController from "./users.controller";
+import AuthService from "./auth.service";
+import AuthController from "./auth.controller";
 import { loginSchema, registerSchema } from "@/schemas/users.schema";
 import Middleware from "@/config/middleware";
 

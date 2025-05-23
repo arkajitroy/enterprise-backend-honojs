@@ -1,5 +1,5 @@
 import userModel, { TUserSchema } from "@/app/model/user-schema";
-import { AuthResponse, LoginDto, LogoutDto, RegisterDto, TUserPayload } from "./users.dto";
+import { AuthResponse, LoginDto, LogoutDto, RegisterDto, TUserPayload } from "./auth.dto";
 import { v4 as uuidv4 } from "uuid";
 import { JWT_SECRET, REFRESH_TOKEN_SECRET } from "@/constants/env";
 import { sign } from "hono/jwt";

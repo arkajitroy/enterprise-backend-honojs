@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { AuthModule } from "../core/users/users.module";
+import { AuthModule } from "@/app/core/auth/auth.module";
 
 const AppRouter = new Hono();
 const authModule = new AuthModule();

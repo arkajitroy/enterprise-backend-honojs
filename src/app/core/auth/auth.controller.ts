@@ -2,7 +2,7 @@ import { Context } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { setCookie } from "hono/cookie";
 
-import AuthService from "./users.service";
+import AuthService from "./auth.service";
 import { accessTokenConfig, refreshTokenConfig } from "@/config/token.config";
 import { logger } from "@/libs/logger";
 import { ApiResponse } from "@/libs/utils";
