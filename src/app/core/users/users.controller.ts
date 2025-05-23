@@ -1,12 +1,13 @@
 import { Context } from "hono";
-import { AuthService } from "./users.service";
+import { StatusCodes } from "http-status-codes";
 import { setCookie } from "hono/cookie";
+
+import AuthService from "./users.service";
 import { accessTokenConfig, refreshTokenConfig } from "@/config/token.config";
 import { logger } from "@/libs/logger";
 import { ApiResponse } from "@/libs/utils";
-import { StatusCodes } from "http-status-codes";
 
-export class AuthController {
+class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   async register(c: any) {
@@ -51,3 +52,5 @@ export class AuthController {
     setCookie(c, "refreshToken", "", { maxAge: 0 });
   }
 }
+
+export default AuthController;

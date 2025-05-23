@@ -1,5 +1,4 @@
 import { CookieOptions } from "hono/utils/cookie";
-import { JWTPayload } from "hono/utils/jwt/types";
 
 export const accessTokenConfig: CookieOptions = {
   httpOnly: true,

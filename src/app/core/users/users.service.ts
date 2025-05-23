@@ -55,7 +55,7 @@ class AuthService extends AuthServiceAbstaction {
       password: hashedPassword,
     };
 
-    const newUser = await userModel.create(user);
+    await userModel.create(user);
 
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
@@ -91,4 +91,4 @@ class AuthService extends AuthServiceAbstaction {
   }
 }
 
-export { AuthService };
+export default AuthService;

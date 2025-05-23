@@ -1,7 +1,6 @@
 import { Hono } from "hono";
-import { AuthService } from "./users.service";
-import { AuthController } from "./users.controller";
-import { zValidator } from "@hono/zod-validator";
+import AuthService from "./users.service";
+import AuthController from "./users.controller";
 import { loginSchema, registerSchema } from "@/schemas/users.schema";
 import Middleware from "@/config/middleware";
 
