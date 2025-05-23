@@ -5,7 +5,7 @@ import StatusCodes from "http-status-codes";
 const authRoutes = {
   register: createRoute({
     method: "post",
-    path: "/auth/register",
+    path: "/register",
     request: {
       body: {
         content: {
