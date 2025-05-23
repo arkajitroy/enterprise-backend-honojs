@@ -1,4 +1,4 @@
-import { MiddlewareHandler } from "hono";
+import { Context, MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { StatusCodes } from "http-status-codes";
@@ -23,7 +23,11 @@ export class ApiResponse<T> {
     return new ApiResponse<T>(data, message, statusCode);
   }
 
-  static error<T>(message = "Error", statusCode = StatusCodes.INTERNAL_SERVER_ERROR, data: T | null = null) {
+  static error<T>(
+    message = "Error",
+    statusCode = StatusCodes.INTERNAL_SERVER_ERROR,
+    data: T | null = null
+  ) {
     return new ApiResponse<T>(data, message, statusCode);
   }
 }
@@ -43,26 +47,9 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Centralized error handling middleware
- */
-export const MiddlewareError: MiddlewareHandler = async (c, next) => {
-  try {
-    await next();
-  } catch (err) {
-    let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-    let message = "Internal Server Error";
-    let data: unknown = null;
-
-    if (err instanceof ApiError) {
-      statusCode = err.statusCode;
-      message = err.message;
-      data = err.data;
-    } else if (err instanceof HTTPException) {
-      statusCode = err.status as StatusCodes;
-      message = err.message || "HTTP Error";
-    }
-
-    return c.json(ApiResponse.error(message, statusCode, data), statusCode as unknown as ContentfulStatusCode);
-  }
+export const getValidatedBody = <T>(c: Context): T => {
+  const payloadType = "json" as unknown as never;
+  const data = c.req.valid?.(payloadType);
+  if (!data) throw new Error("Missing validated body");
+  return data;
 };

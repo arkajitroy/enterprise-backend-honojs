@@ -5,13 +5,14 @@ import { setCookie } from "hono/cookie";
 import AuthService from "./auth.service";
 import { accessTokenConfig, refreshTokenConfig } from "@/config/token.config";
 import { logger } from "@/libs/logger";
-import { ApiResponse } from "@/libs/utils";
+import { ApiResponse, getValidatedBody } from "@/libs/utils";
+import { LoginDto, RegisterDto } from "./auth.dto";
 
 class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  async register(c: any) {
-    const validated = c.get("validatedBody");
+  async register(c: Context) {
+    const validated = getValidatedBody<RegisterDto>(c);
 
     const { user, accessToken, refreshToken } = await this.authService.register(validated);
 
@@ -24,7 +25,7 @@ class AuthController {
   }
 
   async login(c: Context) {
-    const validated = c.get("validatedBody");
+    const validated = getValidatedBody<LoginDto>(c);
 
     const { user, accessToken, refreshToken } = await this.authService.login(validated);
 
@@ -36,10 +37,15 @@ class AuthController {
     return c.json(ApiResponse.success({ user }));
   }
 
-  async refresh(c: any) {
+  async refresh(c: Context) {
     const { accessToken, user } = await this.authService.refresh(c);
 
-    setCookie(c, "accessToken", accessToken, { httpOnly: true, secure: true, sameSite: "Strict", maxAge: 900 });
+    setCookie(c, "accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      maxAge: 900,
+    });
 
     return c.json(ApiResponse.success({ user }));
   }

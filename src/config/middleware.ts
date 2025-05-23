@@ -15,15 +15,15 @@ class Middleware {
     blockDuration: 60,
   });
 
-  static validateRequest(schema: ZodSchema) {
-    return async (c: any, next: () => Promise<void>) => {
-      const body = await c.req.json();
-      const validation = schema.safeParse(body);
-      if (!validation.success) {
-        throw new ApiError("Invalid request body", StatusCodes.BAD_REQUEST, validation.error.issues);
+  static extractValidatedBody() {
+    return async (c: any, next: () => Promise<Response>): Promise<Response> => {
+      const validated = c.req.valid?.("json");
+      if (!validated) {
+        throw new ApiError("Missing validated body", StatusCodes.BAD_REQUEST);
       }
-      c.set("validatedBody", validation.data);
-      await next();
+      c.set("validatedBody", validated);
+
+      return next();
     };
   }
 
@@ -48,7 +48,8 @@ class Middleware {
   }
 
   static async rateLimit(c: any, next: () => Promise<void>) {
-    const ip = c.req.header("x-forwarded-for") || c.req.header("cf-connecting-ip") || c.req.ip || "unknown";
+    const ip =
+      c.req.header("x-forwarded-for") || c.req.header("cf-connecting-ip") || c.req.ip || "unknown";
 
     try {
       await Middleware.rateLimiter.consume(ip);

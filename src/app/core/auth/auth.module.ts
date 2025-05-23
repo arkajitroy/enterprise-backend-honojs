@@ -1,11 +1,10 @@
-import { Hono } from "hono";
 import AuthService from "./auth.service";
 import AuthController from "./auth.controller";
-import { loginSchema, registerSchema } from "@/schemas/users.schema";
-import Middleware from "@/config/middleware";
+import { OpenAPIHono } from "@hono/zod-openapi";
+import authRoutes from "@/app/routes/docs/auth.routes";
 
 export class AuthModule {
-  public router = new Hono();
+  public router = new OpenAPIHono();
   private authService = new AuthService();
   private authController = new AuthController(this.authService);
 
@@ -14,8 +13,10 @@ export class AuthModule {
   }
 
   private routes() {
-    this.router.post("/register", Middleware.validateRequest(registerSchema), (c) => this.authController.register(c));
-    this.router.post("/login", Middleware.validateRequest(loginSchema), (c) => this.authController.login(c));
-    this.router.post("/logout", (c) => this.authController.logout(c));
+    this.router.openapi(authRoutes.register, (payload) => this.authController.register(payload));
+    // this.router.post("/login", Middleware.validateRequest(loginSchema), (c) =>
+    //   this.authController.login(c)
+    // );
+    // this.router.post("/logout", (c) => this.authController.logout(c));
   }
 }
