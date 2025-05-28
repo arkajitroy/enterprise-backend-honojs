@@ -4,13 +4,13 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 const AppRouter = new OpenAPIHono();
 const authModule = new AuthModule();
 
-AppRouter.get("/", (c) => c.text("Welcome to the API!"));
+AppRouter.get("/", (c) => c.text("Server is running successfully"));
 
-AppRouter.doc("/openapi", {
+AppRouter.doc("/docs", {
   openapi: "3.0.0",
   info: {
-    title: "API Documentation",
-    description: "API documentation for the application.",
+    title: "Hono API Documentation",
+    description: "API documentation for the hono application.",
     version: "1.0.0",
   },
 });

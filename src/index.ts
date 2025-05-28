@@ -17,7 +17,6 @@ app.use("*", Middleware.rateLimit);
 app.use("*", MiddlewareError);
 
 // ROUTING CONFIGURATION
-app.get("/", (c) => c.text("Welcome to the API!"));
 app.route("/api", AppRouter);
 
 // Database Connection
