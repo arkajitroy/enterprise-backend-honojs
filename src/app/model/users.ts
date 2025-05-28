@@ -3,8 +3,10 @@ import mongoose, { InferSchemaType, Schema } from "mongoose";
 const userSchema = new Schema({
   id: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String },
   refreshToken: { type: String },
+  role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+  provider: { type: String, enum: ["credentials", "google"], default: "credentials" },
   created_at: { type: Date, default: Date.now },
 });
 
