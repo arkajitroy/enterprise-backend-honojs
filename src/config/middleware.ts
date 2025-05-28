@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import { logger } from "@/libs/logger";
 import { cors } from "hono/cors";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { Context } from "hono";
+import { TUserSchema } from "@/app/model/users";
+import { ALLOWED_USER_ROLES } from "@/constants/auth";
 
 class Middleware {
   constructor() {}
@@ -62,6 +65,16 @@ class Middleware {
       }
       throw err;
     }
+  }
+
+  static hasRole(allowedRoles: typeof ALLOWED_USER_ROLES) {
+    return async (c: Context, next: () => Promise<void>) => {
+      const user: TUserSchema = c.get("user");
+      if (!user || !allowedRoles.includes(user.role)) {
+        throw new ApiError("Forbidden", StatusCodes.FORBIDDEN);
+      }
+      await next();
+    };
   }
 }
 

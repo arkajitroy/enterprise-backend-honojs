@@ -1,6 +1,6 @@
+import { OpenAPIHono } from "@hono/zod-openapi";
 import AuthService from "./auth.service";
 import AuthController from "./auth.controller";
-import { OpenAPIHono } from "@hono/zod-openapi";
 import authRoutes from "@/app/routes/docs/auth.routes";
 
 export class AuthModule {
@@ -14,5 +14,10 @@ export class AuthModule {
 
   private routes() {
     this.router.openapi(authRoutes.register, (payload) => this.authController.register(payload));
+    this.router.openapi(authRoutes.login, (payload) => this.authController.login(payload));
+    this.router.openapi(authRoutes.googleLogin, (payload) =>
+      this.authController.googleLogin(payload)
+    );
+    this.router.openapi(authRoutes.refresh, (payload) => this.authController.refresh(payload));
   }
 }
