@@ -14,9 +14,5 @@ export class AuthModule {
 
   private routes() {
     this.router.openapi(authRoutes.register, (payload) => this.authController.register(payload));
-    // this.router.post("/login", Middleware.validateRequest(loginSchema), (c) =>
-    //   this.authController.login(c)
-    // );
-    // this.router.post("/logout", (c) => this.authController.logout(c));
   }
 }

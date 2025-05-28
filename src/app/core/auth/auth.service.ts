@@ -1,11 +1,19 @@
-import userModel, { TUserSchema } from "@/app/model/user-schema";
-import { AuthResponse, LoginDto, LogoutDto, RegisterDto, TUserPayload } from "./auth.dto";
+import userModel, { TUserSchema } from "@/app/model/users";
+import {
+  AuthResponse,
+  LoginDto,
+  LogoutDto,
+  OAuthGoogleDto,
+  RegisterDto,
+  TUserPayload,
+} from "./auth.dto";
 import { v4 as uuidv4 } from "uuid";
 import { JWT_SECRET, REFRESH_TOKEN_SECRET } from "@/constants/env";
 import { sign } from "hono/jwt";
 import { ApiError } from "@/libs/utils";
 import { StatusCodes } from "http-status-codes";
 import { hash, compare } from "bcryptjs";
+import { AUTH_PROVIDER, AUTH_ROLES } from "@/constants/auth";
 
 // ==================================== AUTH SERVICE ========================================
 
@@ -41,8 +49,13 @@ class AuthService extends AuthServiceAbstaction {
   }
 
   protected async generateAccessToken(user: Pick<TUserSchema, "id" | "email">): Promise<string> {
-    return sign({ sub: user.id, email: user.email, exp: Math.floor(Date.now() / 1000) + 15 * 60 }, JWT_SECRET);
+    return sign(
+      { sub: user.id, email: user.email, exp: Math.floor(Date.now() / 1000) + 15 * 60 },
+      JWT_SECRET
+    );
   }
+
+  // ================================== AUTH METHODS ==================================
 
   async register(data: RegisterDto) {
     const existingUser = await userModel.findOne({ email: data.email });
@@ -53,6 +66,8 @@ class AuthService extends AuthServiceAbstaction {
       id: this.generateUserId(),
       email: data.email,
       password: hashedPassword,
+      role: data.role || "USER",
+      provider: "credentials",
     };
 
     await userModel.create(user);
@@ -62,22 +77,71 @@ class AuthService extends AuthServiceAbstaction {
 
     await userModel.updateOne({ id: user.id }, { refreshToken });
 
-    return { user, accessToken, refreshToken };
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        provider: user.provider,
+      },
+      accessToken,
+      refreshToken,
+    };
   }
 
   async login(data: LoginDto) {
     const user = await userModel.findOne({ email: data.email });
-    if (!user) throw new ApiError("Invalid credentials", 401);
+    if (!user || !user.password)
+      throw new ApiError("Invalid credentials", StatusCodes.UNAUTHORIZED);
 
-    if (!this.comparePassword(data.password, user.password)) {
-      throw new ApiError("Invalid credentials", 401);
-    }
+    const isMatch = await this.comparePassword(data.password, user.password);
+    if (!isMatch) throw new ApiError("Invalid credentials", StatusCodes.UNAUTHORIZED);
 
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
     await userModel.updateOne({ id: user.id }, { refreshToken });
 
-    return { user, accessToken, refreshToken };
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        provider: user.provider,
+      },
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async loginWithGoogle(data: OAuthGoogleDto) {
+    let user = await userModel.findOne({ email: data.email, provider: AUTH_PROVIDER.GOOGLE });
+
+    if (!user) {
+      const userId = this.generateUserId();
+      user = await userModel.create({
+        id: userId,
+        email: data.email,
+        password: null,
+        provider: AUTH_PROVIDER.GOOGLE,
+        role: AUTH_ROLES.USER,
+      });
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+
+    await userModel.updateOne({ id: user.id }, { refreshToken });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        provider: user.provider,
+      },
+      accessToken,
+      refreshToken,
+    };
   }
 
   async logout(userId: string) {

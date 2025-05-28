@@ -1,5 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import { registerSchema } from "@/schemas/users.schema";
+import { registerSchema } from "@/schemas/auth.schema";
 import StatusCodes from "http-status-codes";
 
 const authRoutes = {
