@@ -1,19 +1,11 @@
 import userModel, { TUserSchema } from "@/app/model/users";
-import {
-  AuthResponse,
-  LoginDto,
-  LogoutDto,
-  OAuthGoogleDto,
-  RegisterDto,
-  TUserPayload,
-} from "./auth.dto";
+import { AuthResponse, LoginDto, LogoutDto, RegisterDto, TUserPayload } from "./auth.dto";
 import { v4 as uuidv4 } from "uuid";
 import { JWT_SECRET, REFRESH_TOKEN_SECRET } from "@/constants/env";
 import { sign } from "hono/jwt";
 import { ApiError } from "@/libs/utils";
 import { StatusCodes } from "http-status-codes";
 import { hash, compare } from "bcryptjs";
-import { AUTH_PROVIDER, AUTH_ROLES } from "@/constants/auth";
 
 // ==================================== AUTH SERVICE ========================================
 
@@ -64,10 +56,12 @@ class AuthService extends AuthServiceAbstaction {
     const hashedPassword = await this.encryptPassword(data.password);
     const user: TUserPayload = {
       id: this.generateUserId(),
+      username: data.username,
+      firstname: data.firstname,
+      lastname: data.lastname,
       email: data.email,
       password: hashedPassword,
       role: data.role || "USER",
-      provider: "credentials",
     };
 
     await userModel.create(user);
@@ -82,7 +76,9 @@ class AuthService extends AuthServiceAbstaction {
         id: user.id,
         email: user.email,
         role: user.role,
-        provider: user.provider,
+        username: user.username,
+        firstname: user.firstname,
+        lastname: user.lastname,
       },
       accessToken,
       refreshToken,
@@ -106,38 +102,9 @@ class AuthService extends AuthServiceAbstaction {
         id: user.id,
         email: user.email,
         role: user.role,
-        provider: user.provider,
-      },
-      accessToken,
-      refreshToken,
-    };
-  }
-
-  async loginWithGoogle(data: OAuthGoogleDto) {
-    let user = await userModel.findOne({ email: data.email, provider: AUTH_PROVIDER.GOOGLE });
-
-    if (!user) {
-      const userId = this.generateUserId();
-      user = await userModel.create({
-        id: userId,
-        email: data.email,
-        password: null,
-        provider: AUTH_PROVIDER.GOOGLE,
-        role: AUTH_ROLES.USER,
-      });
-    }
-
-    const accessToken = await this.generateAccessToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
-
-    await userModel.updateOne({ id: user.id }, { refreshToken });
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        provider: user.provider,
+        username: user.username,
+        firstname: user.firstname,
+        lastname: user.lastname,
       },
       accessToken,
       refreshToken,

@@ -6,7 +6,7 @@ import AuthService from "./auth.service";
 import { accessTokenConfig, refreshTokenConfig } from "@/config/token.config";
 import { logger } from "@/libs/logger";
 import { ApiResponse, getValidatedBody } from "@/libs/utils";
-import { LoginDto, OAuthGoogleDto, RegisterDto } from "./auth.dto";
+import { LoginDto, RegisterDto } from "./auth.dto";
 
 class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -35,17 +35,6 @@ class AuthController {
     logger.info({ ...logger.fromContext(c), message: "User logged in" });
 
     return c.json(ApiResponse.success({ user }));
-  }
-
-  async googleLogin(c: Context) {
-    const body = getValidatedBody<OAuthGoogleDto>(c);
-
-    const result = await this.authService.loginWithGoogle(body);
-
-    setCookie(c, "accessToken", result.accessToken, accessTokenConfig);
-    setCookie(c, "refreshToken", result.refreshToken, refreshTokenConfig);
-
-    return c.json(ApiResponse.success({ user: result.user }));
   }
 
   async refresh(c: Context) {

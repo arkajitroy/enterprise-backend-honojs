@@ -1,5 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import { loginSchema, oauthGoogleLoginSchema, registerSchema } from "@/schemas/auth.schema";
+import { loginSchema, registerSchema } from "@/schemas/auth.schema";
 import StatusCodes from "http-status-codes";
 
 const authRoutes = {
@@ -46,27 +46,6 @@ const authRoutes = {
     },
   }),
 
-  googleLogin: createRoute({
-    method: "post",
-    path: "/google",
-    request: {
-      body: {
-        content: {
-          "application/json": {
-            schema: oauthGoogleLoginSchema,
-          },
-        },
-      },
-    },
-    responses: {
-      [StatusCodes.OK]: {
-        description: "User logged in successfully",
-      },
-      [StatusCodes.BAD_REQUEST]: {
-        description: "Invalid request body",
-      },
-    },
-  }),
   refresh: createRoute({
     method: "get",
     path: "/refresh",
